@@ -242,7 +242,7 @@ body.int .pc2 .pr .tx2{background:linear-gradient(135deg,#16a34a,#0f6b32)}
   <p class="intonly note">Internal: Purchase Price = List − Purchase Discount. TR/RTUO: Purchase Price (டேட்டா) → Customer List Price = Purchase × (1 + Profit%) (முழு ரூபாய்க்கு round).</p>
   <p>“P.O.R” = விலை கேட்டு பெற வேண்டும்; “—” = பட்டியலில் விலை இல்லை. இது மாதிரி கணக்கீடு; இறுதி விலை உறுதிப்படுத்திய பின்பே.</p></details>
 </section></main>
-<footer><span id="foot">JKB Bearing Finder</span> · <label style="display:inline;cursor:pointer;color:#ffb066;font-weight:700">🔄 புதிய டேட்டா கோப்பு தேர்வு<input type="file" id="file2" accept=".gz,.json" hidden></label><span id="inst" hidden> · <a href="#" id="instb" style="color:#ffb066;font-weight:700;text-decoration:none">📲 App-ஆக நிறுவு</a></span><span id="ios" hidden> · 📲 iPhone: Share ▸ “Add to Home Screen”</span></footer>
+<footer><span id="foot">JKB Bearing Finder</span> · <label style="display:inline;cursor:pointer;color:#ffb066;font-weight:700">🔄 புதிய டேட்டா கோப்பு தேர்வு<input type="file" id="file2" accept=".gz,.json" hidden></label><span id="inst" hidden> · <a href="#" id="instb" style="color:#ffb066;font-weight:700;text-decoration:none">📲 App-ஆக நிறுவு</a></span><span id="fpw"> · <a href="#" id="fpb" style="color:#ffb066;font-weight:700;text-decoration:none">🔑 PIN மறந்துவிட்டதா?</a></span><span id="ios" hidden> · 📲 iPhone: Share ▸ “Add to Home Screen”</span></footer>
 <script>
 (()=>{
 "use strict";
@@ -271,7 +271,19 @@ const PB=["TR","RTUO"];const PROFIT0={TR:15,RTUO:15};
 let MODE="c",pdisc={},pset={},profit=Object.assign({},PROFIT0);
 const isPB=b=>PB.includes(b);
 const LS=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);v===null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}return null};
-const hp=s=>{let h=5381;s="jkb"+s;for(let i=0;i<s.length;i++)h=(h*33^s.charCodeAt(i))>>>0;return String(h)};
+const sha=s=>{const K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+ const b=Array.from(new TextEncoder().encode(s)),l=b.length*8;b.push(0x80);while(b.length%64!==56)b.push(0);
+ for(let i=7;i>=0;i--)b.push(i>3?0:(l>>>(i*8))&255);
+ let H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];const R=(x,n)=>(x>>>n)|(x<<(32-n));
+ for(let o=0;o<b.length;o+=64){const w=[];for(let i=0;i<16;i++)w[i]=(b[o+4*i]<<24)|(b[o+4*i+1]<<16)|(b[o+4*i+2]<<8)|b[o+4*i+3];
+  for(let i=16;i<64;i++){const s0=R(w[i-15],7)^R(w[i-15],18)^(w[i-15]>>>3),s1=R(w[i-2],17)^R(w[i-2],19)^(w[i-2]>>>10);w[i]=(w[i-16]+s0+w[i-7]+s1)|0}
+  let[a,c,d,e,f,g,h,j]=H;
+  for(let i=0;i<64;i++){const S1=R(f,6)^R(f,11)^R(f,25),ch=(f&g)^(~f&h),t1=(j+S1+ch+K[i]+w[i])|0,S0=R(a,2)^R(a,13)^R(a,22),mj=(a&c)^(a&d)^(c&d),t2=(S0+mj)|0;j=h;h=g;g=f;f=(e+t1)|0;e=d;d=c;c=a;a=(t1+t2)|0}
+  H=[H[0]+a,H[1]+c,H[2]+d,H[3]+e,H[4]+f,H[5]+g,H[6]+h,H[7]+j].map(x=>x|0)}
+ return H.map(x=>(x>>>0).toString(16).padStart(8,"0")).join("")};
+const RCH="47aff1601f2192debc2264e950f533634da73dc2199606539fe69d98c478e574",PUBMODE=false;if(PUBMODE)document.documentElement.classList.add("pub");
+const hp=s=>sha("jkbpin"+s),hpo=s=>{let h=5381;s="jkb"+s;for(let i=0;i<s.length;i++)h=(h*33^s.charCodeAt(i))>>>0;return String(h)};
+const pinok=(x,st)=>st===hp(x)||st===hpo(x);
 const bnm=r=>r[1]===SKI&&r[10]===1?"SKF (Domestic)":r[1]===SKI&&r[10]===2?"SKF IMPORTED":META.brands[r[1]];
 const bkey=r=>r[1]+(r[1]===SKI&&r[10]?":"+r[10]:"");
 const bkname=k=>{const[a,o]=String(k).split(":");return o==="1"?"SKF (Domestic)":o==="2"?"SKF IMPORTED":META.brands[+a]};
@@ -288,7 +300,8 @@ async function boot(){const c=[];
   try{const r=await fetch(DATA_URL,{cache:"no-cache"});if(r.ok)c.push(await parse(await r.arrayBuffer()))}catch(e){}
   const k=await cget();if(k)c.push(k);
   if(!c.length){$("lmsg").textContent="டேட்டா கிடைக்கவில்லை";return}
-  c.sort((a,b)=>(b.meta.ver||"").localeCompare(a.meta.ver||""));start(c[0])}
+  const c2=c.filter(d=>PUBMODE?!!d.meta.pub:!d.meta.pub);if(!c2.length){$("lmsg").textContent="டேட்டா கிடைக்கவில்லை";return}
+  c2.sort((a,b)=>(b.meta.ver||"").localeCompare(a.meta.ver||""));start(c2[0])}
 $("file2").onchange=async e=>{const d=await parse(await e.target.files[0].arrayBuffer());await cput(d);location.reload()};
 function start(d){META=d.meta;ROWS=d.rows;KEY=ROWS.map(r=>norm(r[0]));
   RK=META.brands.map(b=>{const p=ORDER.indexOf(b);return p<0?99:p});
@@ -542,11 +555,14 @@ $("all").oninput=e=>{const v=+e.target.value||0,I=MODE==="i";DN.forEach(b=>{if(!
 $("dg").oninput=e=>{const t=e.target,b=t.dataset.b,k=t.dataset.k;if(!b)return;const v=+t.value||0;
   if(k==="p"){pdisc[b]=v;pset[b]=1;t.classList.remove("unset")}else if(k==="f")profit[b]=v;else disc[b]=v;save();paint()};
 $("dg").onclick=e=>{const q=e.target.closest("[data-pq]");if(q){profit[q.dataset.b]=+q.dataset.pq;dgDraw();save();paint()}};
-$("mode").onclick=()=>{if(MODE==="i"){setMode("c");return}if(document.documentElement.classList.contains("inif"))return;
-  const pin=LS("jkb_pin");if(pin){const x=prompt("Internal mode PIN:");if(x===null)return;if(hp(x)!==pin){alert("PIN தவறு");return}}setMode("i")};
-$("pinset").onclick=()=>{const old=LS("jkb_pin");if(old){const x=prompt("தற்போதைய PIN:");if(x===null)return;if(hp(x)!==old){alert("PIN தவறு");return}}
+$("mode").onclick=()=>{if(MODE==="i"){setMode("c");return}if(PUBMODE||document.documentElement.classList.contains("inif"))return;
+  const pin=LS("jkb_pin");if(pin){const x=prompt("Internal mode PIN:");if(x===null)return;if(!pinok(x,pin)){alert("PIN தவறு. மறந்துவிட்டால் கீழே “PIN மறந்துவிட்டதா?” அழுத்தவும்.");return}}setMode("i")};
+$("pinset").onclick=()=>{const old=LS("jkb_pin");if(old){const x=prompt("தற்போதைய PIN:");if(x===null)return;if(!pinok(x,old)){alert("PIN தவறு");return}}
   const n=prompt("புதிய PIN (4 முதல் 6 இலக்கம்):");if(n===null)return;if(!/^\d{4,6}$/.test(n)){alert("4 முதல் 6 இலக்கம் மட்டும் கொடுக்கவும்");return}LS("jkb_pin",hp(n));modeUI();alert("PIN அமைக்கப்பட்டது ✔")};
-$("pindel").onclick=()=>{const old=LS("jkb_pin");if(!old){alert("PIN எதுவும் இல்லை");return}const x=prompt("தற்போதைய PIN:");if(x===null)return;if(hp(x)!==old){alert("PIN தவறு");return}LS("jkb_pin",null);modeUI();alert("PIN நீக்கப்பட்டது")};
+document.addEventListener("click",e=>{if(e.target.id!=="fpb")return;e.preventDefault();if(!LS("jkb_pin")){alert("PIN எதுவும் அமைக்கப்படவில்லை");return}
+  const c=prompt("Recovery Code-ஐ உள்ளிடவும் (நீ பத்திரப்படுத்தி வைத்த 16 எழுத்து code):");if(c===null)return;
+  if(sha("jkbrc"+c.toUpperCase().replace(/[^A-Z0-9]/g,""))===RCH){LS("jkb_pin",null);modeUI();alert("PIN நீக்கப்பட்டது ✔ இப்போது Internal mode-ஐத் திறக்கலாம். புதிய PIN வேண்டுமானால் Internal-இல் அமைக்கவும்.")}else alert("Recovery Code தவறு")});
+$("pindel").onclick=()=>{const old=LS("jkb_pin");if(!old){alert("PIN எதுவும் இல்லை");return}const x=prompt("தற்போதைய PIN:");if(x===null)return;if(!pinok(x,old)){alert("PIN தவறு");return}LS("jkb_pin",null);modeUI();alert("PIN நீக்கப்பட்டது")};
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{mode=b.dataset.m;document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===b));
   $("m-num").hidden=mode!=="num";$("m-size").hidden=mode!=="size";brand="";tf=null;run()});
 $("cats").onclick=e=>{const b=e.target.closest(".cat");if(b){cat=b.dataset.c;brand="";run()}};
